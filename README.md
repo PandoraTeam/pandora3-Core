@@ -1,2 +1,3 @@
-# pandora3-Core
+# Pandora 3.0 - Core
 Lightweight PHP framework
+[Documentation](https://nescafe62.github.io/pandora3)
