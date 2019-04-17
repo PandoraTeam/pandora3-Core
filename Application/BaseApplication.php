@@ -2,8 +2,9 @@
 namespace Pandora3\Core\Application;
 
 use Closure;
-use Pandora3\Core\Container\Exception\ContainerException;
 use Pandora3\Core\Debug\Debug;
+use Pandora3\Core\Interfaces\RequestDispatcherInterface;
+use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Throwable;
 use Pandora3\Core\Http\Request;
 use Pandora3\Core\Router\Router;
@@ -167,9 +168,12 @@ abstract class BaseApplication implements ApplicationInterface {
 
 		foreach($this->getRoutes() as $routePath => $handler) {
 			if (is_string($handler)) {
-				/* if (!ClassImplements($handler, RequestInterface::class))) { todo:
-					// error
-				} */
+				if (!array_intersect(
+					[RequestHandlerInterface::class, RequestDispatcherInterface::class],
+					class_implements($handler)
+				)) {
+					throw new \LogicException("Route handler for '$routePath' must me [Closure] or implement [RequestHandlerInterface] or [RequestDispatcherInterface]");
+				}
 				$handler = $this->container->get($handler);
 			}
 			$this->router->add($routePath, $handler);
