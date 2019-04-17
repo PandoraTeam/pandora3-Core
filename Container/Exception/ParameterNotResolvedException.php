@@ -3,6 +3,10 @@ namespace Pandora3\Core\Container\Exception;
 
 use Throwable;
 
+/**
+ * Class ParameterNotResolvedException
+ * @package Pandora3\Core\Container\Exception
+ */
 class ParameterNotResolvedException extends ContainerException {
 
 	public function __construct(string $className, string $parameter, Throwable $previous = null) {

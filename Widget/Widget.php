@@ -5,6 +5,10 @@ use Pandora3\Core\Interfaces\RenderInterface;
 use Pandora3\Core\Widget\Exception\WidgetRenderException;
 use Pandora3\Plugins\Twig\TwigRenderer;
 
+/**
+ * Class Widget
+ * @package Pandora3\Core\Widget
+ */
 abstract class Widget implements RenderInterface {
 	
 	/** @var array $context */

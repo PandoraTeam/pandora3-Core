@@ -1,6 +1,10 @@
 <?php
 namespace Pandora3\Core\Properties;
 
+/**
+ * Trait Getters
+ * @package Pandora3\Core\Properties
+ */
 trait Getters {
 	
 	// todo: __isset

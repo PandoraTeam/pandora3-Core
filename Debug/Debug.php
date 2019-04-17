@@ -3,6 +3,10 @@ namespace Pandora3\Core\Debug;
 
 use Throwable;
 
+/**
+ * Class Debug
+ * @package Pandora3\Core\Debug
+ */
 class Debug {
 
 	/**

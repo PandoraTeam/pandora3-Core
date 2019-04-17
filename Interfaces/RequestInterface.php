@@ -2,6 +2,9 @@
 namespace Pandora3\Core\Interfaces;
 
 /**
+ * Interface RequestInterface
+ * @package Pandora3\Core\Interfaces
+ *
  * @property-read string $uri
  * @property-read bool $isPost
  */

@@ -15,6 +15,9 @@ use Pandora3\Core\Interfaces\ApplicationInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
 
 /**
+ * Class BaseApplication
+ * @package Pandora3\Core\Application
+ *
  * @property-read Registry $config
  * @property-read string $path
  * @property-read string $mode

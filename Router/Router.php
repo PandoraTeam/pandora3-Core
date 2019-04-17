@@ -7,6 +7,10 @@ use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
 use Pandora3\Core\Router\Exception\RouteNotFoundException;
 
+/**
+ * Class Router
+ * @package Pandora3\Core\Router
+ */
 class Router implements RouterInterface {
 	
 	/** @var RequestHandlerInterface[] $routes */

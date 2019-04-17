@@ -1,6 +1,10 @@
 <?php
 namespace Pandora3\Core\Properties;
 
+/**
+ * Trait Setters
+ * @package Pandora3\Core\Properties
+ */
 trait Setters {
 	
 	/**

@@ -9,6 +9,10 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 
+/**
+ * Class Container
+ * @package Pandora3\Core\Container
+ */
 class Container {
 
 	/** @var array $dependencies */

@@ -5,6 +5,8 @@ use Pandora3\Core\Interfaces\RequestInterface;
 
 /**
  * Class Request
+ * @package Pandora3\Core\Http
+ *
  * @property-read string $method
  * @property-read string $uri
  * @property-read bool $isPost

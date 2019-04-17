@@ -23,6 +23,9 @@ use Pandora3\Core\Http\Response;
 use Pandora3\Plugins\Twig\TwigRenderer;
 
 /**
+ * Class Controller
+ * @package Pandora3\Core\Controller
+ *
  * @property-read string $baseUri
  */
 abstract class Controller implements ControllerInterface, RequestDispatcherInterface {

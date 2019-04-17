@@ -1,6 +1,10 @@
 <?php
 namespace Pandora3\Core\Registry;
 
+/**
+ * Class Registry
+ * @package Pandora3\Core\Registry
+ */
 class Registry {
 
 	/** @var array $data */

@@ -3,6 +3,10 @@ namespace Pandora3\Core\Container\Exception;
 
 use Throwable;
 
+/**
+ * Class DependencyNotInstantiableException
+ * @package Pandora3\Core\Container\Exception
+ */
 class DependencyNotInstantiableException extends ContainerException {
 
 	public function __construct(string $dependency, Throwable $previous = null) {

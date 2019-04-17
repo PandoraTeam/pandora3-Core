@@ -6,6 +6,10 @@ use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Interfaces\ResponseInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 
+/**
+ * Class RequestHandler
+ * @package Pandora3\Core\Router
+ */
 class RequestHandler implements RequestHandlerInterface {
 
 	/** @var Closure $handler */

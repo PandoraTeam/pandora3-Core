@@ -3,6 +3,10 @@ namespace Pandora3\Core\Http;
 
 use Pandora3\Core\Interfaces\ResponseInterface;
 
+/**
+ * Class Response
+ * @package Pandora3\Core\Http
+ */
 class Response implements ResponseInterface {
 
 	/** @var string $content */

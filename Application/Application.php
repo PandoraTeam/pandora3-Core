@@ -10,6 +10,9 @@ use Pandora3\Plugins\Authorisation\Authorisation;
 use Pandora3\Plugins\Authorisation\UserProviderInterface;
 
 /**
+ * Class Application
+ * @package Pandora3\Core\Application
+ *
  * @property-read string $baseUri
  * @property-read DatabaseConnectionInterface $database
  * @property-read Authorisation $auth

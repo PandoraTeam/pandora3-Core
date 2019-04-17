@@ -1,6 +1,10 @@
 <?php
 namespace Pandora3\Core\Interfaces;
 
+/**
+ * Interface SessionInterface
+ * @package Pandora3\Core\Interfaces
+ */
 interface SessionInterface {
 
 	/**

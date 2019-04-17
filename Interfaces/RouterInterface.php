@@ -3,6 +3,10 @@ namespace Pandora3\Core\Interfaces;
 
 use Closure;
 
+/**
+ * Interface RouterInterface
+ * @package Pandora3\Core\Interfaces
+ */
 interface RouterInterface extends RequestDispatcherInterface {
 
 	/**

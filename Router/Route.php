@@ -7,6 +7,10 @@ use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Interfaces\ResponseInterface;
 use Pandora3\Core\Interfaces\RouteInterface;
 
+/**
+ * Class Route
+ * @package Pandora3\Core\Router
+ */
 class Route implements RouteInterface {
 
 	/** @var Closure $handler */
