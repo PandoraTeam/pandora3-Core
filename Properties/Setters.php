@@ -11,7 +11,7 @@ trait Setters {
 	 * @param string $property
 	 * @param mixed $value
 	 */
-	public function __set(string $property, $value) {
+	public function __set(string $property, $value): void {
 		$methodName = 'set'.ucfirst($property);
 		if (method_exists($this, $methodName)) {
 			$this->{$methodName}($value);

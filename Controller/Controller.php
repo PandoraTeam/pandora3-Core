@@ -151,13 +151,13 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		]);
 	}
 
-	protected function getAssets() {
+	protected function getAssets(): string {
 		$app = Application::getInstance();
 		$filename = APP_PATH.'/../public/'.($app->isMode(Application::MODE_DEV) ? 'assets-dev.json' : 'assets.json');
 		return $this->generateAssets($filename, '/assets/');
 	}
 
-	protected function generateAssets(string $filename, string $path = '/') {
+	protected function generateAssets(string $filename, string $path = '/'): string {
 		/* if (!is_file($filename)) {
 			throw new AssetsFileNotFoundException("Assets file not found '$filename'");
 		} */

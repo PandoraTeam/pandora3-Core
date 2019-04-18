@@ -24,7 +24,7 @@ class Container {
 	/**
 	 * @param array $dependencies
 	 */
-	public function setDependencies(array $dependencies) {
+	public function setDependencies(array $dependencies): void {
 		foreach($dependencies as $interface => $dependency) {
 			$this->set($interface, $dependency);
 		}
@@ -33,7 +33,7 @@ class Container {
 	/**
 	 * @param array $dependencies
 	 */
-	public function setDependenciesShared(array $dependencies) {
+	public function setDependenciesShared(array $dependencies): void {
 		foreach($dependencies as $interface => $dependency) {
 			$this->setShared($interface, $dependency);
 		}
@@ -43,7 +43,7 @@ class Container {
 	 * @param string $abstract
 	 * @param string|Closure $dependency
 	 */
-	public function set(string $abstract, $dependency) {
+	public function set(string $abstract, $dependency): void {
 		$this->dependencies[$abstract] = [$dependency, false];
 	}
 	
@@ -51,7 +51,7 @@ class Container {
 	 * @param string $abstract
 	 * @param string|Closure $dependency
 	 */
-	public function setShared(string $abstract, $dependency) {
+	public function setShared(string $abstract, $dependency): void {
 		$this->dependencies[$abstract] = [$dependency, true];
 	}
 	
@@ -59,7 +59,7 @@ class Container {
 	 * @param string $abstract
 	 * @param mixed $instance
 	 */
-	/* public function setInstance(string $abstract, $instance) {
+	/* public function setInstance(string $abstract, $instance): void {
 		$this->instances[$abstract] = $instance;
 	} */
 
