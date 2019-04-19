@@ -32,7 +32,7 @@ abstract class Application extends BaseApplication {
 	/**
 	 * @param string $mode
 	 */
-	public function run(string $mode = ''): void {
+	public function run(string $mode = self::MODE_DEV): void {
 		self::$instance = $this;
 		parent::run($mode);
 	}
