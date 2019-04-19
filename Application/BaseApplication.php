@@ -170,7 +170,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	/**
 	 * @param string $mode
 	 */
-	protected function _run(string $mode = ''): void {
+	protected function _run(string $mode = self::MODE_DEV): void {
 		$this->mode = $mode;
 
 		foreach($this->getRoutes() as $routePath => $handler) {
@@ -194,7 +194,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	/**
 	 * @param string $mode
 	 */
-	public function run(string $mode = ''): void {
+	public function run(string $mode = self::MODE_DEV): void {
 		// todo: move somewhere else
 		register_shutdown_function(function() {
 			$fatalErrors = E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR;
