@@ -95,6 +95,9 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		return $this->_baseUri;
 	}
 
+	/**
+	 * @param string $layout
+	 */
 	protected function setLayout(string $layout): void {
 		$this->layout = 'Layout/'.$layout.'.twig';
 	}
@@ -115,6 +118,10 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		return $router->dispatch($path, $arguments);
 	}
 
+	/**
+	 * @param string $method
+	 * @return RequestHandlerInterface
+	 */
 	protected function getActionHandler(string $method): RequestHandlerInterface {
 		if (!method_exists($this, $method)) {
 			$className = static::class;
@@ -157,6 +164,11 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		return $this->generateAssets($filename, '/assets/');
 	}
 
+	/**
+	 * @param string $filename
+	 * @param string $path
+	 * @return string
+	 */
 	protected function generateAssets(string $filename, string $path = '/'): string {
 		/* if (!is_file($filename)) {
 			throw new AssetsFileNotFoundException("Assets file not found '$filename'");

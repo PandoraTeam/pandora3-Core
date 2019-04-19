@@ -69,7 +69,7 @@ class Router implements RouterInterface {
 	}
 
 	/**
-	 * @param string
+	 * @param string $path
 	 * @param array|null $arguments
 	 * @return RequestHandlerInterface
 	 * @throws RouteNotFoundException

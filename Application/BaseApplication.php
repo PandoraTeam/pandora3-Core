@@ -26,9 +26,9 @@ use Pandora3\Core\Interfaces\RouterInterface;
 */
 abstract class BaseApplication implements ApplicationInterface {
 
-	public const MODE_DEV = 'dev';
-	public const MODE_PROD = 'prod';
-	public const MODE_TEST = 'test';
+	const MODE_DEV = 'dev';
+	const MODE_PROD = 'prod';
+	const MODE_TEST = 'test';
 
 	/** @var Container $container */
 	protected $container;

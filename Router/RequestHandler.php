@@ -15,6 +15,9 @@ class RequestHandler implements RequestHandlerInterface {
 	/** @var Closure $handler */
 	protected $handler;
 
+	/**
+	 * @param Closure $handler
+	 */
 	public function __construct(Closure $handler) {
 		$this->handler = $handler;
 	}

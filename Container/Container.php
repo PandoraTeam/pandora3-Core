@@ -2,9 +2,10 @@
 namespace Pandora3\Core\Container;
 
 use Closure;
-use Pandora3\Core\Container\Exception\{
-	ParameterNotResolvedException, ContainerException, ClassNotFoundException, DependencyNotInstantiableException
-};
+use Pandora3\Core\Container\Exception\ParameterNotResolvedException;
+use Pandora3\Core\Container\Exception\ContainerException;
+use Pandora3\Core\Container\Exception\ClassNotFoundException;
+use Pandora3\Core\Container\Exception\DependencyNotInstantiableException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
