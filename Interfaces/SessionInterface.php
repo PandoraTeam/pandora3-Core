@@ -24,6 +24,9 @@ interface SessionInterface {
 	 */
 	public function set(string $property, $value): void;
 
+	/**
+	 * @param string $property
+	 */
 	public function clear(string $property): void;
 
 }
