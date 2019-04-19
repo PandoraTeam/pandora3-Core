@@ -24,14 +24,14 @@ abstract class Widget implements RenderInterface {
 	abstract protected function getView(): string;
 	
 	/**
-	 * @param array $contextOverride
+	 * @param array $context
 	 * @return string
 	 * @throws WidgetRenderException
 	 */
-	public function render(array $contextOverride = []): string {
+	public function render(array $context = []): string {
 		$renderer = new TwigRenderer(APP_PATH.'/Views');
 		$viewPath = $this->getView();
-		$context = array_replace($this->context, $contextOverride);
+		$context = array_replace($this->context, $context);
 		try {
 			return $renderer->render($viewPath, $context);
 		} catch (\Throwable $ex) {

@@ -11,7 +11,7 @@ trait Getters {
 	
 	/**
 	 * @param string $property
-	 * @return mixed
+	 * @return mixed|null
 	 */
 	public function __get(string $property) {
 		$methodName = 'get'.ucfirst($property);

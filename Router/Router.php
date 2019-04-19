@@ -13,11 +13,11 @@ use Pandora3\Core\Router\Exception\RouteNotFoundException;
  */
 class Router implements RouterInterface {
 	
-	/** @var RequestHandlerInterface[] $routes */
+	/** @var array $routes */
 	protected $routes;
 	
 	/**
-	 * @param RequestHandlerInterface[] $routes
+	 * @param array $routes
 	 */
 	public function __construct(array $routes = []) {
 		$this->routes = $routes;
