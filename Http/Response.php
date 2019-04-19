@@ -15,6 +15,10 @@ class Response implements ResponseInterface {
 	/** @var array $headers */
 	protected $headers;
 
+	/**
+	 * @param string $content
+	 * @param array $headers
+	 */
 	public function __construct(string $content, array $headers = []) {
 		$this->content = $content;
 		$this->headers = $headers;
