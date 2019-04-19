@@ -118,7 +118,11 @@ abstract class BaseApplication implements ApplicationInterface {
 		return null;
 		// throw new \Exception('Method or property does not exists'); todo:
 	}
-	
+
+	/**
+	 * @param string $property
+	 * @return bool
+	 */
 	public function __isset(string $property): bool {
 		return array_key_exists($property, $this->properties);
 	}
