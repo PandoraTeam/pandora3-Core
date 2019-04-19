@@ -9,6 +9,10 @@ use Throwable;
  */
 class ClassNotFoundException extends ContainerException {
 
+	/**
+	 * @param string $className
+	 * @param Throwable|null $previous
+	 */
 	public function __construct(string $className, Throwable $previous = null) {
 		$message = "Class [$className] not found";
 		parent::__construct($message, E_USER_WARNING, $previous);
