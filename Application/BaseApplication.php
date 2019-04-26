@@ -36,13 +36,22 @@ abstract class BaseApplication implements ApplicationInterface {
 	/** @var array $properties */
 	protected $properties = [];
 
-	/** @var string $path */
+	/**
+	 * @internal
+	 * @var string $path
+	 */
 	protected $path;
 
-	/** @var string $mode */
+	/**
+	 * @internal
+	 * @var string $mode
+	 */
 	protected $mode;
 
-	/** @var Registry $config */
+	/**
+	 * @internal
+	 * @var Registry $config
+	 */
 	protected $config;
 
 	public function __construct() {

@@ -13,10 +13,16 @@ use Pandora3\Core\Interfaces\RequestInterface;
  */
 class Request implements RequestInterface {
 
-	/** @var string $uri */
+	/**
+	 * @internal
+	 * @var string $uri
+	 */
 	protected $uri;
 	
-	/** @var string $method */
+	/**
+	 * @internal
+	 * @var string $method
+	 */
 	protected $method;
 
 	/** @var array $files */
