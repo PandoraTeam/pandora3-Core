@@ -41,6 +41,10 @@ abstract class Application extends BaseApplication {
 		return $this->config->get('secret');
 	}
 
+	/**
+	 * @internal
+	 * @return string
+	 */
 	protected function getBaseUri(): string {
 		return $this->config->get('baseUri') ?? '/';
 	}

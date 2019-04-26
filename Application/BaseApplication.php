@@ -94,6 +94,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return mixed|null
 	 */
@@ -120,6 +121,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return bool
 	 */
@@ -128,27 +130,27 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	protected function getConfig(): array {
-		// warning: no config defined todo:
+		// todo: warning - no config defined
 		return [];
 	}
 
 	protected function getRoutes(): array {
-		// warning: no routes defined todo:
+		// todo: warning - no routes defined
 		return include("{$this->path}/routes.php");
 	}
 
+	/**
+	 * @internal
+	 * @return string
+	 */
 	protected function getPath(): string {
-		try {
-			$reflection = new \ReflectionClass(get_class($this));
-			return dirname($reflection->getFileName());
-		} catch (\ReflectionException $ex) { // will never occur
+		// try {
+		$reflection = new \ReflectionClass(get_class($this));
+		return dirname($reflection->getFileName());
+		/* } catch (\ReflectionException $ex) { // will never occur
 			Debug::logException($ex);
 			return '';
-		}
-	}
-
-	protected function getMode(): string {
-		return $this->mode;
+		} */
 	}
 
 	/**
@@ -168,6 +170,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	/**
+	 * @internal
 	 * @param string $mode
 	 */
 	protected function _run(string $mode = self::MODE_DEV): void {

@@ -33,7 +33,10 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	/** @var Container $container */
 	protected $container;
 
-	/** @var string $_baseUri */
+	/**
+	 * @internal
+	 * @var string $_baseUri
+	 */
 	protected $_baseUri;
 
 	/** @var string $name */
@@ -68,6 +71,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return mixed
 	 */
@@ -85,6 +89,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
+	 * @internal
 	 * @return string
 	 */
 	protected function getBaseUri(): string {
@@ -139,6 +144,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	
 	// todo: move to somewhere
 	/**
+	 * @internal
 	 * @return array
 	 */
 	protected function getLayoutParams(): array {
@@ -158,6 +164,9 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		]);
 	}
 
+	/**
+	 * @internal
+	 */
 	protected function getAssets(): string {
 		$app = Application::getInstance();
 		$filename = APP_PATH.'/../public/'.($app->isMode(Application::MODE_DEV) ? 'assets-dev.json' : 'assets.json');
@@ -165,6 +174,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
+	 * @internal
 	 * @param string $filename
 	 * @param string $path
 	 * @return string
@@ -186,7 +196,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		return $this->name;
 	}
 
-	// todo: move to TwigRenderer
+	// todo: use Renderer
 	/**
 	 * @param string $view
 	 * @param array $context

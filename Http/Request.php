@@ -31,6 +31,7 @@ class Request implements RequestInterface {
 	}
 
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return mixed
 	 */

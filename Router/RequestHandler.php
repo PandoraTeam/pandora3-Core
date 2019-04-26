@@ -28,10 +28,4 @@ class RequestHandler implements RequestHandlerInterface {
 		// return is_string($response) ? new Response($response) : $response;
 	}
 
-	/* public function dispatch(string $path, RequestInterface $request): ResponseInterface {
-		$handler = $this->handler;
-		$response = $handler($request);
-		return is_string($response) ? new Response($response) : $response;
-	} */
-
 }

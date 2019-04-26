@@ -70,7 +70,7 @@ class Container {
 	 * @return mixed
 	 * @throws ParameterNotResolvedException
 	 */
-	public function resolvePrimitive(ReflectionParameter $parameter, string $className) {
+	protected function resolvePrimitive(ReflectionParameter $parameter, string $className) {
 		if (!$parameter->isDefaultValueAvailable()) {
 			throw new ParameterNotResolvedException($className, $parameter->getName());
 		}
@@ -93,9 +93,9 @@ class Container {
 			}
 			/** @var ReflectionParameter $dependency */
 			$class = $dependency->getClass();
-			$result[] = ($class !== null) ?
-				$this->resolve($class->name) :
-				$this->resolvePrimitive($dependency, $className);
+			$result[] = ($class !== null)
+				? $this->resolve($class->name)
+				: $this->resolvePrimitive($dependency, $className);
 		}
 		return $result;
 	}

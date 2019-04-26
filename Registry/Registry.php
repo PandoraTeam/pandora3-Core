@@ -18,6 +18,7 @@ class Registry {
 	}
 
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return mixed|null
 	 */
@@ -26,6 +27,7 @@ class Registry {
 	}
 	
 	/**
+	 * @internal
 	 * @param string $property
 	 * @return mixed|null
 	 */
