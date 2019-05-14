@@ -1,0 +1,6 @@
+engines:
+	phan:
+		enabled: true
+		checks:
+			PhanAccessReadOnlyMagicProperty:
+				enabled: false
