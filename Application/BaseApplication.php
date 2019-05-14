@@ -109,7 +109,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	 */
 	public function __get(string $property) {
 		if (array_key_exists($property, $this->properties)) {
-			// todo: try catch ContainerException log property is null
+			// todo: maybe try catch ContainerException & log property is null
 //			echo '<pre>';
 //			var_dump($this->container);
 //			echo '</pre>';
