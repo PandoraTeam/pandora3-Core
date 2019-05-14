@@ -1,6 +1,7 @@
 # Pandora 3.0 - Core
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-steelblue.svg)](https://opensource.org/licenses/MIT)
+[![Maintainability](https://api.codeclimate.com/v1/badges/e15962c47999068a9183/maintainability)](https://codeclimate.com/github/PandoraTeam/pandora3-Core)
 
 Lightweight PHP framework
 
