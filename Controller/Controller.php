@@ -93,7 +93,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	 * @return string
 	 */
 	protected function getBaseUri(): string {
-		if ($this->_baseUri === null) {
+		if (is_null($this->_baseUri)) {
 			$app = Application::getInstance();
 			$this->_baseUri = preg_replace('#/$#', '', $app->baseUri);
 		}

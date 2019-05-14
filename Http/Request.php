@@ -128,7 +128,7 @@ class Request implements RequestInterface {
 	 * @return array
 	 */
 	public function getFiles(): array {
-		if ($this->files === null) {
+		if (is_null($this->files)) {
 			$this->files = $_FILES; // todo: normalize files
 		}
 		return $this->files;

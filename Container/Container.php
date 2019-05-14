@@ -122,7 +122,7 @@ class Container {
 		}
 
 		$constructor = $reflection->getConstructor();
-		if ($constructor === null) {
+		if (is_null($constructor)) {
 			return new $class();
 		}
 
