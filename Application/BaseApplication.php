@@ -212,6 +212,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	 */
 	public function run(string $mode = self::MODE_DEV): void {
 		// todo: move somewhere else
+		ini_set('display_errors', 1);
 		register_shutdown_function(function() {
 			$fatalErrors = E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR;
 			$error = error_get_last();
