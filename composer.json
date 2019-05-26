@@ -1,23 +1,23 @@
 {
-	"name": "pandora3/core",
-	"description": "Lightweight PHP framework",
-	"keywords": ["php", "framework", "pandora"],
-	"homepage": "http://pandora.u-238.ru",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Petr Gostin",
-			"email": "nescafe238@gmail.com",
-			"homepage": "http://u-238.ru",
-			"role": "Developer"
-		}
-	],
-	"require": {
-		"php": ">=7.1"
-	},
-	"autoload": {
-		"psr-4": {
-			"Pandora3\\Core\\": "/"
-		}
-	}
+    "name": "pandora3/core",
+    "description": "Lightweight PHP framework",
+    "keywords": ["php", "framework", "pandora"],
+    "homepage": "http://pandora.u-238.ru",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Petr Gostin",
+            "email": "nescafe238@gmail.com",
+            "homepage": "http://u-238.ru",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pandora3\\Core\\": "/"
+        }
+    }
 }
