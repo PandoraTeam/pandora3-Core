@@ -10,9 +10,10 @@ use Throwable;
 class Debug {
 
 	/**
-	 * @param Throwable $ex
+	 * @param int|string $code
+	 * @return string
 	 */
-	public static function dumpException(Throwable $ex) {
+	public static function getErrorName($code): string {
 		$errorNames = [
 			E_ERROR => 'Error',
 			E_WARNING => 'Warning',
@@ -30,28 +31,35 @@ class Debug {
 			E_DEPRECATED => 'Deprecated',
 			E_USER_DEPRECATED => 'Deprecated',
 		];
+		return $errorNames[$code] ?? 'Error '.$code;
+	}
 
-		echo '<b>'.($errorNames[$ex->getCode()] ?? 'Error').'</b>: ';
-		echo '<pre style="display: inline;">'.str_replace('  ', '    ', htmlspecialchars($ex->getMessage())).'</pre>';
-		echo ' in <b>'.$ex->getFile().'</b> on line <b>'.$ex->getLine().'</b><br>';
+	/**
+	 * @param Throwable $exception
+	 */
+	public static function dumpException(Throwable $exception) {
+		echo '<b>'.self::getErrorName($exception->getCode()).'</b>: ';
+		echo '<pre style="display: inline;">'.str_replace('  ', '    ', htmlspecialchars($exception->getMessage())).'</pre>';
+		echo ' in <b>'.$exception->getFile().'</b> on line <b>'.$exception->getLine().'</b><br>';
 
-		$e = $ex->getPrevious();
-		$trace = ($e != null) ? $e->getTraceAsString() : $ex->getTraceAsString();
-		$subMessages = [];
-		while ($e != null) {
-			$subMessages[] = [
+		$ex = $exception->getPrevious();
+		$trace = ($ex != null) ? $ex->getTraceAsString() : $exception->getTraceAsString();
+		// $subMessages = [];
+		
+		while ($ex != null) {
+			/* $subMessages[] = [
 				'type' => 'exception',
-				'level' => $e->getCode(),
-				'message' => $e->getMessage(),
-				'file' => $e->getFile(), // relativePath(...), todo:
-				'line' => $e->getLine(),
-			];
+				'level' => $ex->getCode(),
+				'message' => $ex->getMessage(),
+				'file' => $ex->getFile(), // relativePath(...), todo:
+				'line' => $ex->getLine(),
+			]; */
 
 			echo '<pre style="display: inline;">    </pre><b>'.($errorNames[$ex->getCode()] ?? 'Error').'</b>: ';
-			echo '<pre style="display: inline;">'.str_replace('  ', '    ', htmlspecialchars($e->getMessage())).'</pre>';
-			echo ' in <b>'.$e->getFile().'</b> on line <b>'.$e->getLine().'</b><br>';
+			echo '<pre style="display: inline;">'.str_replace('  ', '    ', htmlspecialchars($ex->getMessage())).'</pre>';
+			echo ' in <b>'.$ex->getFile().'</b> on line <b>'.$ex->getLine().'</b><br>';
 
-			$e = $e->getPrevious();
+			$ex = $ex->getPrevious();
 		}
 
 		echo '<pre style="display: inline;">';
@@ -63,7 +71,7 @@ class Debug {
 	 * @param Throwable $ex
 	 */
 	public static function logException(Throwable $ex) {
-		// todo: implement
+		\Dump::logException($ex);
 	}
 
 }

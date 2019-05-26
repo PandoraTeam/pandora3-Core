@@ -6,6 +6,7 @@ namespace Pandora3\Core\Interfaces;
  * @package Pandora3\Core\Interfaces
  *
  * @property-read string $uri
+ * @property-read string $refererUri
  * @property-read bool $isPost
  */
 interface RequestInterface {
@@ -14,7 +15,17 @@ interface RequestInterface {
 	 * @return string
 	 */
 	function getUri(): string;
+
+	/**
+	 * @return string
+	 */
+	function getRefererUri(): string;
 	
+	/**
+	 * @return string
+	 */
+	function getMethod(): string;
+
 	/**
 	 * @return bool
 	 */
@@ -30,7 +41,7 @@ interface RequestInterface {
 	 * @param string|null $method
 	 * @return array
 	 */
-	function all($method): array;
+	function all(?string $method): array;
 	
 	/**
 	 * @param string $param

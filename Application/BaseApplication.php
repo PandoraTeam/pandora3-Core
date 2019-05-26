@@ -2,6 +2,7 @@
 namespace Pandora3\Core\Application;
 
 use Closure;
+use Pandora3\Core\Container\Exceptions\ContainerException;
 use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
@@ -58,7 +59,7 @@ abstract class BaseApplication implements ApplicationInterface {
 		$this->path = $this->getPath();
 		define('APP_PATH', $this->path);
 		$this->config = new Registry($this->getConfig());
-		$this->container = new Container();
+		$this->container = new Container;
 		$this->dependencies($this->container);
 	}
 
@@ -68,7 +69,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	protected function dependencies(Container $container): void {
 		$container->set(Request::class, function() {
 			$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-			$uri = preg_replace('#^[^/]#', '/$0', $uri);
+			$uri = (strncmp($uri, '/', 1) === 0 ? '' : '/').$uri;
 			return new Request($uri);
 		});
 		$container->setDependencies([
@@ -103,21 +104,19 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	/**
-	 * @internal
+	 * @ignore
 	 * @param string $property
 	 * @return mixed|null
 	 */
 	public function __get(string $property) {
 		if (array_key_exists($property, $this->properties)) {
-			// todo: maybe try catch ContainerException & log property is null
-//			echo '<pre>';
-//			var_dump($this->container);
-//			echo '</pre>';
-		//	try {
+			try {
 				return $this->container->get($property);
-		//	} catch (ContainerException $ex) {
-		//		;
-		//	}
+			} catch (ContainerException $ex) {
+				$className = static::class;
+				Debug::logException(new \Exception("Get container property '$property' failed for [$className]", E_WARNING, $ex));
+				return null;
+			}
 		}
 		if (!in_array($property, ['config', 'routes', 'path'])) {
 			$methodName = 'get'.ucfirst($property);
@@ -125,12 +124,13 @@ abstract class BaseApplication implements ApplicationInterface {
 				return $this->{$methodName}();
 			}
 		}
+		$className = static::class;
+		Debug::logException(new \Exception("Undefined property '$property' for [$className]", E_NOTICE));
 		return null;
-		// throw new \Exception('Method or property does not exists'); todo:
 	}
 
 	/**
-	 * @internal
+	 * @ignore
 	 * @param string $property
 	 * @return bool
 	 */
@@ -138,11 +138,19 @@ abstract class BaseApplication implements ApplicationInterface {
 		return array_key_exists($property, $this->properties);
 	}
 
+	/**
+	 * @return array
+	 */
 	protected function getConfig(): array {
 		// todo: warning - no config defined
 		return [];
 	}
 
+	/**
+	 * Gets application routes
+	 *
+	 * @return array
+	 */
 	protected function getRoutes(): array {
 		// todo: warning - no routes defined
 		return include("{$this->path}/routes.php");
@@ -153,13 +161,8 @@ abstract class BaseApplication implements ApplicationInterface {
 	 * @return string
 	 */
 	protected function getPath(): string {
-		// try {
-		$reflection = new \ReflectionClass(get_class($this));
+		$reflection = new \ReflectionClass(static::class);
 		return dirname($reflection->getFileName());
-		/* } catch (\ReflectionException $ex) { // will never occur
-			Debug::logException($ex);
-			return '';
-		} */
 	}
 
 	/**
@@ -200,6 +203,7 @@ abstract class BaseApplication implements ApplicationInterface {
 
 		$handler = $this->router->dispatch($this->request->uri, $arguments);
 		$response = $handler->handle($this->request, $arguments);
+		// todo: catch exception
 		$response->send();
 	}
 

@@ -22,6 +22,9 @@ class RequestHandler implements RequestHandlerInterface {
 		$this->handler = $handler;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function handle(RequestInterface $request, array $arguments = []): ResponseInterface {
 		$handler = $this->handler;
 		return $handler($request, ...$arguments);

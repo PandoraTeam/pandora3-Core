@@ -2,12 +2,12 @@
 namespace Pandora3\Core\Container;
 
 use Closure;
-use Pandora3\Core\Container\Exception\ParameterNotResolvedException;
-use Pandora3\Core\Container\Exception\ContainerException;
-use Pandora3\Core\Container\Exception\ClassNotFoundException;
-use Pandora3\Core\Container\Exception\DependencyNotInstantiableException;
+use Pandora3\Core\Container\Exceptions\ParameterNotResolvedException;
+use Pandora3\Core\Container\Exceptions\ContainerException;
+use Pandora3\Core\Container\Exceptions\ClassNotFoundException;
+use Pandora3\Core\Container\Exceptions\DependencyNotInstantiableException;
+use Pandora3\Core\Debug\Debug;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionParameter;
 
 /**
@@ -21,24 +21,6 @@ class Container {
 
 	/** @var array $instances */
 	protected $instances = [];
-
-	/**
-	 * @param array $dependencies
-	 */
-	public function setDependencies(array $dependencies): void {
-		foreach($dependencies as $interface => $dependency) {
-			$this->set($interface, $dependency);
-		}
-	}
-	
-	/**
-	 * @param array $dependencies
-	 */
-	public function setDependenciesShared(array $dependencies): void {
-		foreach($dependencies as $interface => $dependency) {
-			$this->setShared($interface, $dependency);
-		}
-	}
 
 	/**
 	 * @param string $abstract
@@ -56,13 +38,23 @@ class Container {
 		$this->dependencies[$abstract] = [$dependency, true];
 	}
 	
-	/* *
-	 * @param string $abstract
-	 * @param mixed $instance
+	/**
+	 * @param array $dependencies
 	 */
-	/* public function setInstance(string $abstract, $instance): void {
-		$this->instances[$abstract] = $instance;
-	} */
+	public function setDependencies(array $dependencies): void {
+		foreach ($dependencies as $interface => $dependency) {
+			$this->set($interface, $dependency);
+		}
+	}
+
+	/**
+	 * @param array $dependencies
+	 */
+	public function setDependenciesShared(array $dependencies): void {
+		foreach ($dependencies as $interface => $dependency) {
+			$this->setShared($interface, $dependency);
+		}
+	}
 
 	/**
 	 * @param ReflectionParameter $parameter
@@ -79,7 +71,7 @@ class Container {
 
 	/**
 	 * @param string $className
-	 * @param array $dependencies
+	 * @param ReflectionParameter[] $dependencies
 	 * @param array $params
 	 * @return array
 	 * @throws ContainerException
@@ -91,9 +83,8 @@ class Container {
 				$result[] = $params[$dependency->name];
 				continue;
 			}
-			/** @var ReflectionParameter $dependency */
 			$class = $dependency->getClass();
-			$result[] = ($class !== null)
+			$result[] = (!is_null($class))
 				? $this->resolve($class->name)
 				: $this->resolvePrimitive($dependency, $className);
 		}
@@ -111,12 +102,11 @@ class Container {
 		 	return $class($this, $params);
 		}
 
-		try {
-			$reflection = new ReflectionClass($class);
-		} catch (ReflectionException $ex) {
-			throw new ClassNotFoundException($class, $ex);
+		if (!class_exists($class)) {
+			throw new ClassNotFoundException($class);
 		}
 
+		$reflection = new ReflectionClass($class);
 		if (!$reflection->isInstantiable()) {
 			throw new DependencyNotInstantiableException($class);
 		}
@@ -145,8 +135,6 @@ class Container {
 
 		[$class, $shared] = $this->dependencies[$abstract] ?? [$abstract, false];
 
-		// $object = $this->build($class, $params);
-
 		if ($abstract === $class || $class instanceof Closure) {
 			$object = $this->build($class, $params);
 		} else {
@@ -168,6 +156,37 @@ class Container {
 	 */
 	public function get(string $abstract, array $params = []) {
 		return $this->resolve($abstract, $params);
+	}
+
+	/**
+	 * @param string $property
+	 * @return bool
+	 */
+	public function has(string $property): bool {
+		return array_key_exists($property, $this->dependencies);
+	}
+
+	/**
+	 * @ignore
+	 * @param string $property
+	 * @return mixed
+	 */
+	public function __get(string $property) {
+		if ($this->has($property)) {
+			return $this->get($property);
+		}
+		$className = static::class;
+		Debug::logException(new \Exception("Undefined property '$property' for [$className]", E_NOTICE));
+		return null;
+	}
+
+	/**
+	 * @ignore
+	 * @param string $property
+	 * @return bool
+	 */
+	public function __isset(string $property): bool {
+		return !is_null($this->get($property));
 	}
 
 }

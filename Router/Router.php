@@ -5,7 +5,7 @@ use Closure;
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
-use Pandora3\Core\Router\Exception\RouteNotFoundException;
+use Pandora3\Core\Router\Exceptions\RouteNotFoundException;
 
 /**
  * Class Router
@@ -24,8 +24,7 @@ class Router implements RouterInterface {
 	}
 	
 	/**
-	 * @param string $routePath
-	 * @param RequestHandlerInterface|RequestDispatcherInterface|Closure $handler
+	 * {@inheritdoc}
 	 */
 	public function add(string $routePath, $handler): void {
 		if (array_key_exists($routePath, $this->routes)) {
@@ -69,10 +68,7 @@ class Router implements RouterInterface {
 	}
 
 	/**
-	 * @param string $path
-	 * @param array|null $arguments
-	 * @return RequestHandlerInterface
-	 * @throws RouteNotFoundException
+	 * {@inheritdoc}
 	 */
 	public function dispatch(string $path, &$arguments = null): RequestHandlerInterface {
 		$arguments = $arguments ?? [];

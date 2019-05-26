@@ -4,15 +4,14 @@ namespace Pandora3\Core\Controller;
 // temporary
 use App\Widgets\Menu\Menu;
 
-use Throwable;
 use Closure;
-use Pandora3\Core\Application\Application;
-use Pandora3\Core\Controller\Exception\ControllerRenderViewException;
+use Pandora3\Core\Controller\Exceptions\ControllerRenderViewException;
+use Pandora3\Core\Debug\Debug;
+use Pandora3\Core\Interfaces\RendererInterface;
+use Pandora3\Libs\Application\Application; // todo: fix dependency
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Pandora3\Core\Container\Container;
-use Pandora3\Core\Container\Exception\ContainerException;
-use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\ControllerInterface;
 use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Interfaces\ResponseInterface;
@@ -20,7 +19,7 @@ use Pandora3\Core\Interfaces\RouterInterface;
 use Pandora3\Core\Router\RequestHandler;
 use Pandora3\Core\Router\Router;
 use Pandora3\Core\Http\Response;
-use Pandora3\Plugins\Twig\TwigRenderer;
+use Pandora3\Plugins\Twig\TwigRenderer; // todo: extend dependency from application container
 
 /**
  * Class Controller
@@ -49,29 +48,48 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	protected $request;
 	
 	protected function init(): void {
-		$this->container = new Container();
 		$this->name = $this->getName();
-		$this->dependencies();
-	}
-
-	protected function dependencies(): void {
-		$this->container->set(RouterInterface::class, Router::class);
+		$this->container = new Container;
+		$this->dependencies($this->container);
 	}
 
 	/**
-	 * @return array
+	 * @param Container $container
+	 */
+	protected function dependencies(Container $container): void {
+		$container->setDependencies([
+			RouterInterface::class => Router::class,
+			RendererInterface::class => TwigRenderer::class,
+		]);
+
+		$container->setShared(TwigRenderer::class, function() {
+			$renderer = new TwigRenderer(APP_PATH.'/Views');
+			$renderer->addFunctions([
+				'dump' => 'dump',
+				'debugOutput' => function() {
+					$output = \Dump::getOutput();
+					return $output ? '<div class="debug-output">'.$output.'</div>' : '';
+				},
+				'assets' => Closure::fromCallable([$this, 'getAssets']),
+			]);
+			return $renderer;
+		});
+	}
+
+	/**
+	 * {@inheritdoc}
 	 */
 	public function getRoutes(): array {
 		return [];
 	}
 	
 	private function getName(): string {
-		preg_match('#(.*\\\\)?(.*)Controller$#', get_class($this), $matches);
+		preg_match('#(.*\\\\)?(.*)Controller$#', static::class, $matches);
 		return $matches[2] ?? '';
 	}
 
 	/**
-	 * @internal
+	 * @ignore
 	 * @param string $property
 	 * @return mixed
 	 */
@@ -82,10 +100,10 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		$methodName = $methods[$property] ?? '';
 		if ($methodName && method_exists($this, $methodName)) {
 			return $this->{$methodName}();
-		} else {
-			return null;
-			// throw new \Exception('Method or property does not exist'); todo:
 		}
+		$className = static::class;
+		Debug::logException(new \Exception("Undefined property '$property' for [$className]", E_NOTICE));
+		return null;
 	}
 
 	/**
@@ -108,15 +126,12 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
-	 * @param string $path
-	 * @param array|null $arguments
-	 * @throws ContainerException
-	 * @return RequestHandlerInterface
+	 * {@inheritdoc}
 	 */
 	public function dispatch(string $path, &$arguments = null): RequestHandlerInterface {
 		$this->init();
-		$router = $this->container->get(RouterInterface::class);
 		/** @var RouterInterface $router */
+		$router = $this->container->get(RouterInterface::class);
 		foreach($this->getRoutes() as $routePath => $method) {
 			$router->add($routePath, $this->getActionHandler($method));
 		}
@@ -128,12 +143,11 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	 * @return RequestHandlerInterface
 	 */
 	protected function getActionHandler(string $method): RequestHandlerInterface {
-		if (!method_exists($this, $method)) {
-			$className = static::class;
-			throw new \RuntimeException("Controller [$className] action method '$method' not exist");
-		}
-
 		return new RequestHandler( function(RequestInterface $request, ...$arguments) use ($method) {
+			if (!method_exists($this, $method)) {
+				$className = static::class;
+				throw new \RuntimeException("Undefined controller method '$method' for [$className]");
+			}
 			$this->request = $request;
 			/* $this->container->setShared(RequestInterface::class, function() {
 				return $this->request;
@@ -160,7 +174,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 			return $params;
 		}
 		return array_replace($params, [
-			'menu' => new Menu(),
+			'menu' => new Menu($this->request->uri),
 		]);
 	}
 
@@ -184,6 +198,9 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 			throw new AssetsFileNotFoundException("Assets file not found '$filename'");
 		} */
 		$assets = json_decode(file_get_contents($filename))->main;
+		if (!isset($assets->js)) {
+			return '';
+		}
 		$scripts = !is_array($assets->js) ? [$assets->js] : $assets->js;
 		$html = '';
 		foreach ($scripts as $script) {
@@ -196,30 +213,21 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		return $this->name;
 	}
 
-	// todo: use Renderer
 	/**
 	 * @param string $view
 	 * @param array $context
 	 * @return ResponseInterface
+	 * @throws ControllerRenderViewException
 	 */
 	protected function render(string $view, array $context = []): ResponseInterface {
-		$renderer = new TwigRenderer(APP_PATH.'/Views');
-		$renderer->addFunctions([
-			'dump' => 'dump',
-			'debugOutput' => function() {
-				$output = \Dump::getOutput();
-				return $output ? '<div class="debug-output">'.$output.'</div>' : '';
-			},
-			'assets' => Closure::fromCallable([$this, 'getAssets']),
-		]);
-
-		$viewPath = "{$this->getViewPath()}/{$view}.twig";
+		/** @var RendererInterface $renderer */
+		$renderer = $this->container->get(RendererInterface::class);
+		$viewPath = "{$this->getViewPath()}/{$view}";
 		$context = array_replace($context, $this->getLayoutParams());
 		try {
 			return new Response( $renderer->render($viewPath, $context) );
-		} catch (\Throwable $ex) {
-			$className = get_class($this);
-			return $this->errorPage(new ControllerRenderViewException("Rendering view '$viewPath' failed for [$className]", E_WARNING, $ex));
+		} catch (\RuntimeException $ex) {
+			throw new ControllerRenderViewException($viewPath, static::class, $ex);
 		}
 	}
 	
@@ -237,14 +245,14 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		]);
 	}
 
-	/**
+	/* *
 	 * @param Throwable $exception
 	 * @return ResponseInterface
 	 */
-	protected function errorPage(Throwable $exception): ResponseInterface {
+	/* protected function errorPage(Throwable $exception): ResponseInterface {
 		ob_start();
 		Debug::dumpException($exception);
 		return new Response(ob_get_clean());
-	}
+	} */
 
 }

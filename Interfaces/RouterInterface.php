@@ -2,6 +2,7 @@
 namespace Pandora3\Core\Interfaces;
 
 use Closure;
+use Pandora3\Core\Router\Exceptions\RouteNotFoundException;
 
 /**
  * Interface RouterInterface
