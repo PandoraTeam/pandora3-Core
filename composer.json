@@ -3,7 +3,7 @@
 	"description": "Lightweight PHP framework",
 	"keywords": ["php", "framework", "pandora"],
 	"homepage": "http://pandora.u-238.ru",
-	"license": "LGPL-3.0",
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Petr Gostin",
