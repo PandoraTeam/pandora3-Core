@@ -15,9 +15,15 @@
     "require": {
         "php": ">=7.1"
     },
+    "extra": {
+		"installer-name": "Core"
+	}
     "autoload": {
         "psr-4": {
-            "Pandora3\\Core\\": "/"
+            "Pandora3\\Core\\": "/",
+            "Pandora3\\Libs\\": "../Libs",
+			"Pandora3\\Plugins\\": "../Plugins",
+			"Pandora3\\Widgets\\": "../Widgets"
         }
     }
 }
