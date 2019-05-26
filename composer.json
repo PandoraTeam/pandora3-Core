@@ -17,7 +17,7 @@
     },
     "extra": {
 		"installer-name": "Core"
-	}
+	},
     "autoload": {
         "psr-4": {
             "Pandora3\\Core\\": "/",
