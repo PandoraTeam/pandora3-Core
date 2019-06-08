@@ -15,6 +15,6 @@ interface RequestDispatcherInterface {
 	 * @return RequestHandlerInterface
 	 * @throws RouteNotFoundException
 	 */
-	function dispatch(string $path, &$arguments): RequestHandlerInterface;
+	function dispatch(string $path, ?array &$arguments): RequestHandlerInterface;
 
 }

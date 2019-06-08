@@ -48,7 +48,7 @@ class Router implements RouterInterface {
 	 * @param array|null $variables
 	 * @return bool
 	 */
-	protected function matchRoute(string $path, string $routePath, &$subPath = null, &$variables = null): bool {
+	protected function matchRoute(string $path, string $routePath, ?string &$subPath = null, ?array &$variables = null): bool {
 		$pattern = preg_replace('#\{[^\}/]+\}#', '([^/]+)', $routePath);
 
 		$ending = '$';
@@ -70,7 +70,7 @@ class Router implements RouterInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function dispatch(string $path, &$arguments = null): RequestHandlerInterface {
+	public function dispatch(string $path, ?array &$arguments = null): RequestHandlerInterface {
 		$arguments = $arguments ?? [];
 		// todo: request params, sort paths
 		// var_dump(array_keys($this->routes));

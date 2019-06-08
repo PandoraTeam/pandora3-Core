@@ -2,11 +2,17 @@
 namespace Pandora3\Core\Application;
 
 use Closure;
+use Throwable;
+use Pandora3\Core\Application\Exceptions\UnregisteredMiddlewareException;
 use Pandora3\Core\Container\Exceptions\ContainerException;
+use Pandora3\Core\Controller\Controller;
 use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
-use Throwable;
+use Pandora3\Core\Middleware\Interfaces\MiddlewareInterface;
+use Pandora3\Core\Middleware\MiddlewareChain;
+use Pandora3\Core\Middleware\MiddlewareDispatcher;
+use Pandora3\Core\Router\RequestHandler;
 use Pandora3\Core\Http\Request;
 use Pandora3\Core\Router\Router;
 use Pandora3\Core\Interfaces\RequestInterface;
@@ -36,6 +42,9 @@ abstract class BaseApplication implements ApplicationInterface {
 
 	/** @var array $properties */
 	protected $properties = [];
+	
+	/** @var array $middlewares */
+	protected $middlewares = [];
 
 	/**
 	 * @internal
@@ -92,6 +101,14 @@ abstract class BaseApplication implements ApplicationInterface {
 		foreach($properties as $property => $dependency) {
 			$this->setProperty($property, $dependency);
 		}
+	}
+	
+	/**
+	 * @param string $middleware
+	 * @param string $className
+	 */
+	protected function registerMiddleware(string $middleware, string $className): void {
+		$this->middlewares[$middleware] = $className;
 	}
 
 	/**
@@ -182,51 +199,109 @@ abstract class BaseApplication implements ApplicationInterface {
 	}
 
 	/**
-	 * @internal
-	 * @param string $mode
+	 * @param Throwable $ex
 	 */
-	protected function _run(string $mode = self::MODE_DEV): void {
-		$this->mode = $mode;
-
+	protected function handleRuntimeError(Throwable $ex): void {
+		Debug::dumpException($ex);
+	}
+	
+	/**
+	 * @param string $name
+	 * @return MiddlewareInterface|null
+	 * @throws UnregisteredMiddlewareException
+	 */
+	public function getMiddleware(string $name): ?MiddlewareInterface {
+		if (!array_key_exists($name, $this->middlewares)) {
+			throw new UnregisteredMiddlewareException($name);
+		}
+		return $this->container->get($this->middlewares[$name]);
+	}
+	
+	/**
+	 * @param RequestHandlerInterface|RequestDispatcherInterface $handler
+	 * @param MiddlewareInterface[] $middlewares
+	 * @return RequestHandlerInterface|RequestDispatcherInterface
+	 */
+	public function chainMiddlewares($handler, ...$middlewares) {
+		$middlewares = array_map( function(string $middleware) {
+			try {
+				return $this->getMiddleware($middleware);
+			} catch (UnregisteredMiddlewareException $ex) {
+				throw $ex;
+			}
+		}, $middlewares);
+		$chain = new MiddlewareChain(...$middlewares);
+		
+		if ($handler instanceof RequestDispatcherInterface) {
+			return new MiddlewareDispatcher($handler, $chain);
+		} else {
+			return $chain->wrapHandler($handler);
+		}
+	}
+	
+	/**
+	 * @param array $arguments
+	 * @return RequestHandlerInterface
+	 */
+	protected function dispatch(array &$arguments): RequestHandlerInterface {
 		foreach($this->getRoutes() as $routePath => $handler) {
-			if (is_string($handler)) {
+			$middlewares = [];
+			if (is_array($handler)) {
+				[$middlewares, $handler] = $handler;
+				if (!is_array($middlewares)) {
+					$middlewares = [$middlewares];
+				}
+			}
+			
+			if ($handler instanceof Closure) {
+				$handler = new RequestHandler($handler);
+			} else if (is_string($handler)) {
 				if (!array_intersect(
 					[RequestHandlerInterface::class, RequestDispatcherInterface::class],
 					class_implements($handler)
 				)) {
-					throw new \LogicException("Route handler for '$routePath' must me [Closure] or implement [RequestHandlerInterface] or [RequestDispatcherInterface]");
+					throw new \LogicException("Route handler for '$routePath' must be [Closure] or implement [RequestHandlerInterface] or [RequestDispatcherInterface]");
 				}
 				$handler = $this->container->get($handler);
+				if ($handler instanceof Controller) {
+					$handler->setApplication($this);
+				}
+			}
+			
+			if ($middlewares) {
+				$handler = $this->chainMiddlewares($handler, ...$middlewares);
 			}
 			$this->router->add($routePath, $handler);
 		}
-
-		$handler = $this->router->dispatch($this->request->uri, $arguments);
-		$response = $handler->handle($this->request, $arguments);
-		// todo: catch exception
-		$response->send();
+		
+		return $this->router->dispatch($this->request->uri, $arguments);
 	}
-
+	
 	/**
 	 * @param string $mode
 	 */
 	public function run(string $mode = self::MODE_DEV): void {
-		// todo: move somewhere else
-		ini_set('display_errors', 1);
-		register_shutdown_function(function() {
-			$fatalErrors = E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR;
-			$error = error_get_last();
-			if ($error && ($error['type'] & $fatalErrors)) {
-				echo '<pre>';
-				var_dump($error);
-				echo '</pre>';
-			}
-		});
+		if ($mode === self::MODE_DEV) {
+			ini_set('display_errors', 1);
+			register_shutdown_function( function() {
+				$fatalErrors = E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR;
+				$error = error_get_last();
+				if ($error && ($error['type'] & $fatalErrors)) {
+					echo '<pre>';
+					var_dump($error);
+					echo '</pre>';
+				}
+			});
+		}
 
 		try {
-			$this->_run($mode);
+			$this->mode = $mode;
+			$arguments = [];
+			$handler = $this->dispatch($arguments);
+			$response = $handler->handle($this->request, $arguments);
+			$response->send();
 		} catch (Throwable $ex) {
-			Debug::dumpException($ex);
+			$this->handleRuntimeError($ex);
 		}
 	}
 

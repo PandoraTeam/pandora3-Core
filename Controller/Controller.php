@@ -5,6 +5,7 @@ namespace Pandora3\Core\Controller;
 use App\Widgets\Menu\Menu;
 
 use Closure;
+use Pandora3\Core\Application\BaseApplication;
 use Pandora3\Core\Controller\Exceptions\ControllerRenderViewException;
 use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RendererInterface;
@@ -26,11 +27,15 @@ use Pandora3\Plugins\Twig\TwigRenderer; // todo: extend dependency from applicat
  * @package Pandora3\Core\Controller
  *
  * @property-read string $baseUri
+ * @property-read BaseApplication $app
  */
 abstract class Controller implements ControllerInterface, RequestDispatcherInterface {
 
 	/** @var Container $container */
 	protected $container;
+	
+	/** @var BaseApplication $app */
+	protected $app;
 
 	/**
 	 * @internal
@@ -52,7 +57,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		$this->container = new Container;
 		$this->dependencies($this->container);
 	}
-
+	
 	/**
 	 * @param Container $container
 	 */
@@ -96,6 +101,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	public function __get(string $property) {
 		$methods = [
 			'baseUri' => 'getBaseUri',
+			'app' => 'getApp',
 		];
 		$methodName = $methods[$property] ?? '';
 		if ($methodName && method_exists($this, $methodName)) {
@@ -107,13 +113,30 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
+	 * @param BaseApplication $application
+	 */
+	public function setApplication(BaseApplication $application) {
+		$this->app = $application;
+	}
+	
+	/**
+	 * @internal
+	 * @return BaseApplication
+	 */
+	protected function getApp(): BaseApplication {
+		return $this->app;
+	}
+
+	/**
 	 * @internal
 	 * @return string
 	 */
 	protected function getBaseUri(): string {
 		if (is_null($this->_baseUri)) {
-			$app = Application::getInstance();
-			$this->_baseUri = preg_replace('#/$#', '', $app->baseUri);
+			$this->_baseUri = '';
+			if ($this->app instanceof Application) {
+				$this->_baseUri = preg_replace('#/$#', '', $this->app->baseUri);
+			}
 		}
 		return $this->_baseUri;
 	}
@@ -128,12 +151,28 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	/**
 	 * {@inheritdoc}
 	 */
-	public function dispatch(string $path, &$arguments = null): RequestHandlerInterface {
+	public function dispatch(string $path, ?array &$arguments = null): RequestHandlerInterface {
 		$this->init();
 		/** @var RouterInterface $router */
 		$router = $this->container->get(RouterInterface::class);
 		foreach($this->getRoutes() as $routePath => $method) {
-			$router->add($routePath, $this->getActionHandler($method));
+			$middlewares = [];
+			if (is_array($method)) {
+				[$middlewares, $method] = $method;
+				if (!is_array($middlewares)) {
+					$middlewares = [$middlewares];
+				}
+			}
+			if (is_string($method)) {
+				$handler = $this->getActionHandler($method);
+			} else {
+				$handler = $method; // todo: check is Closure|RequestHandlerInterface|RequestDispatcherInterface
+			}
+			
+			if ($middlewares) {
+				$handler = $this->app->chainMiddlewares($handler, ...$middlewares);
+			}
+			$router->add($routePath, $handler);
 		}
 		return $router->dispatch($path, $arguments);
 	}
