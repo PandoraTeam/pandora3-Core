@@ -5,13 +5,9 @@ use Closure;
 use Throwable;
 use Pandora3\Core\Container\Exceptions\ContainerException;
 use Pandora3\Core\Debug\Debug;
-use Pandora3\Core\Http\Request;
-use Pandora3\Core\Router\Router;
-use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Registry\Registry;
 use Pandora3\Core\Container\Container;
 use Pandora3\Core\Interfaces\ApplicationInterface;
-use Pandora3\Core\Interfaces\RouterInterface;
 
 /**
  * Class BaseApplication
@@ -20,9 +16,7 @@ use Pandora3\Core\Interfaces\RouterInterface;
  * @property-read Registry $config
  * @property-read string $path
  * @property-read string $mode
- * @property-read RequestInterface $request
- * @property-read RouterInterface $router
-*/
+ */
 abstract class BaseApplication implements ApplicationInterface {
 
 	const MODE_DEV = 'dev';
@@ -65,21 +59,10 @@ abstract class BaseApplication implements ApplicationInterface {
 	 * @param Container $container
 	 */
 	protected function dependencies(Container $container): void {
-		$container->set(Request::class, function() {
-			$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-			$uri = (strncmp($uri, '/', 1) === 0 ? '' : '/').$uri;
-			return new Request($uri);
-		});
-		$container->setDependencies([
-			RequestInterface::class => Request::class,
-			RouterInterface::class => Router::class,
-		]);
 		$this->setProperties([
 			'config' =>  function() { return $this->config; },
 			'path' =>  function() { return $this->path; },
 			'mode' => function() { return $this->mode; },
-			'request' => RequestInterface::class,
-			'router' => RouterInterface::class,
 		]);
 	}
 	
