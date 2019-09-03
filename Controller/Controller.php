@@ -5,10 +5,11 @@ namespace Pandora3\Core\Controller;
 use App\Widgets\Menu\Menu;
 
 use Closure;
-use Pandora3\Core\Application\BaseApplication;
 use Pandora3\Core\Controller\Exceptions\ControllerRenderViewException;
 use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RendererInterface;
+use Pandora3\Core\Middleware\Interfaces\MiddlewareInterface;
+use Pandora3\Core\MiddlewareRouter\MiddlewareRouter;
 use Pandora3\Libs\Application\Application; // todo: fix dependency
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
@@ -18,7 +19,6 @@ use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Interfaces\ResponseInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
 use Pandora3\Core\Router\RequestHandler;
-use Pandora3\Core\Router\Router;
 use Pandora3\Core\Http\Response;
 use Pandora3\Plugins\Twig\TwigRenderer; // todo: extend dependency from application container
 
@@ -27,15 +27,18 @@ use Pandora3\Plugins\Twig\TwigRenderer; // todo: extend dependency from applicat
  * @package Pandora3\Core\Controller
  *
  * @property-read string $baseUri
- * @property-read BaseApplication $app
+ * @property-read Application $app
  */
 abstract class Controller implements ControllerInterface, RequestDispatcherInterface {
 
 	/** @var Container $container */
 	protected $container;
 	
-	/** @var BaseApplication $app */
+	/** @var Application $app */
 	protected $app;
+	
+	/** @var bool $initialised */
+	private $initialised;
 
 	/**
 	 * @internal
@@ -47,15 +50,22 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	protected $name;
 
 	/** @var string $layout */
-	protected $layout = 'Layout/Main.twig';
+	protected $layout = 'Layout/Main.twig'; // todo: extract somewhere
 
 	/** @var RequestInterface $request */
 	protected $request;
 	
+	/** @var RequestDispatcherInterface $dispatcher */
+	protected $dispatcher;
+	
 	protected function init(): void {
+		if ($this->initialised) {
+			return;
+		}
 		$this->name = $this->getName();
 		$this->container = new Container;
 		$this->dependencies($this->container);
+		$this->initialised = true;
 	}
 	
 	/**
@@ -63,12 +73,16 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	 */
 	protected function dependencies(Container $container): void {
 		$container->setDependencies([
-			RouterInterface::class => Router::class,
+			RouterInterface::class => MiddlewareRouter::class,
 			RendererInterface::class => TwigRenderer::class,
 		]);
-
+		
+		$container->set(MiddlewareRouter::class, function(Container $c, $routes = []) {
+			return new MiddlewareRouter($routes, $c);
+		});
 		$container->setShared(TwigRenderer::class, function() {
 			$renderer = new TwigRenderer(APP_PATH.'/Views');
+			// todo: extract to extension
 			$renderer->addFunctions([
 				'dump' => 'dump',
 				'debugOutput' => function() {
@@ -80,11 +94,64 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 			return $renderer;
 		});
 	}
+	
+	/**
+	 * @return RequestDispatcherInterface
+	 */
+	protected function getDispatcher(): RequestDispatcherInterface {
+		if (is_null($this->dispatcher)) {
+			/** @var RouterInterface|MiddlewareRouter $dispatcher */
+			$dispatcher = $this->container->get(RouterInterface::class);
+			$routes = $this->getRoutes();
+			$this->registerRoutes($dispatcher, $routes);
+			
+			if ($dispatcher instanceof MiddlewareRouter) {
+				$middlewares = $this->getMiddlewares();
+				if ($middlewares) {
+					$dispatcher = $dispatcher->wrapHandler($dispatcher, $middlewares);
+				}
+			}
+			$this->dispatcher = $dispatcher;
+		}
+		return $this->dispatcher;
+	}
+	
+	/**
+	 * @param RouterInterface|MiddlewareRouter $router
+	 * @param array $routes
+	 */
+	protected function registerRoutes($router, array $routes) {
+		foreach($routes as $routePath => $handler) {
+			$middlewares = [];
+			if (is_array($handler)) {
+				[$middlewares, $handler] = $handler;
+				if (!is_array($middlewares)) {
+					$middlewares = [$middlewares];
+				}
+			}
+			if (is_string($handler)) {
+				$handler = $this->getActionHandler($handler);
+			}
+			
+			if ($router instanceof MiddlewareRouter) {
+				$router->add($routePath, $handler, $middlewares);
+			} else {
+				$router->add($routePath, $handler);
+			}
+		}
+	}
 
 	/**
 	 * {@inheritdoc}
 	 */
 	public function getRoutes(): array {
+		return [];
+	}
+	
+	/**
+	 * @return MiddlewareInterface[]
+	 */
+	public function getMiddlewares(): array {
 		return [];
 	}
 	
@@ -101,7 +168,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	public function __get(string $property) {
 		$methods = [
 			'baseUri' => 'getBaseUri',
-			'app' => 'getApp',
+			'app' => 'getApplication',
 		];
 		$methodName = $methods[$property] ?? '';
 		if ($methodName && method_exists($this, $methodName)) {
@@ -113,17 +180,17 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 
 	/**
-	 * @param BaseApplication $application
+	 * @param Application $application
 	 */
-	public function setApplication(BaseApplication $application) {
+	public function setApplication(Application $application) {
 		$this->app = $application;
 	}
 	
 	/**
 	 * @internal
-	 * @return BaseApplication
+	 * @return Application
 	 */
-	protected function getApp(): BaseApplication {
+	protected function getApplication(): Application {
 		return $this->app;
 	}
 
@@ -153,28 +220,8 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	 */
 	public function dispatch(string $path, ?array &$arguments = null): RequestHandlerInterface {
 		$this->init();
-		/** @var RouterInterface $router */
-		$router = $this->container->get(RouterInterface::class);
-		foreach($this->getRoutes() as $routePath => $method) {
-			$middlewares = [];
-			if (is_array($method)) {
-				[$middlewares, $method] = $method;
-				if (!is_array($middlewares)) {
-					$middlewares = [$middlewares];
-				}
-			}
-			if (is_string($method)) {
-				$handler = $this->getActionHandler($method);
-			} else {
-				$handler = $method; // todo: check is Closure|RequestHandlerInterface|RequestDispatcherInterface
-			}
-			
-			if ($middlewares) {
-				$handler = $this->app->chainMiddlewares($handler, ...$middlewares);
-			}
-			$router->add($routePath, $handler);
-		}
-		return $router->dispatch($path, $arguments);
+		$dispatcher = $this->getDispatcher();
+		return $dispatcher->dispatch($path, $arguments);
 	}
 
 	/**
