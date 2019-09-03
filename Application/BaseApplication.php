@@ -52,6 +52,10 @@ abstract class BaseApplication implements ApplicationInterface {
 		define('APP_PATH', $this->path);
 		$this->config = new Registry($this->getConfig());
 		$this->container = new Container;
+		$this->container->setShared(Container::class, function(Container $container) {
+			return $container;
+		});
+		$this->container->setShared('app', function() { return $this; });
 		$this->dependencies($this->container);
 	}
 

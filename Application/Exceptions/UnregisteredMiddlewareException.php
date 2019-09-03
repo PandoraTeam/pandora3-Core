@@ -2,10 +2,14 @@
 namespace Pandora3\Core\Application\Exceptions;
 
 use Throwable;
-use Exception;
+use RuntimeException;
 use Pandora3\Core\Interfaces\Exceptions\CoreException;
 
-class UnregisteredMiddlewareException extends Exception implements CoreException {
+/**
+ * Class UnregisteredMiddlewareException
+ * @package Pandora3\Core\Application\Exceptions
+ */
+class UnregisteredMiddlewareException extends RuntimeException implements CoreException {
 
 	/**
 	 * @param string $middlewareName
