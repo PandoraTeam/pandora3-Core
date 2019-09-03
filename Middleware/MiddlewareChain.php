@@ -4,6 +4,10 @@ namespace Pandora3\Core\Middleware;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Pandora3\Core\Middleware\Interfaces\MiddlewareInterface;
 
+/**
+ * Class MiddlewareChain
+ * @package Pandora3\Core\Middleware
+ */
 class MiddlewareChain {
 	
 	/** @var MiddlewareInterface[] $middlewares */

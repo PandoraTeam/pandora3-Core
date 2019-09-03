@@ -4,6 +4,10 @@ namespace Pandora3\Core\Middleware;
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 
+/**
+ * Class MiddlewareDispatcher
+ * @package Pandora3\Core\Middleware
+ */
 class MiddlewareDispatcher implements RequestDispatcherInterface {
 	
 	/** @var RequestDispatcherInterface $dispatcher */

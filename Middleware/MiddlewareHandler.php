@@ -6,6 +6,10 @@ use Pandora3\Core\Interfaces\RequestInterface;
 use Pandora3\Core\Interfaces\ResponseInterface;
 use Pandora3\Core\Middleware\Interfaces\MiddlewareInterface;
 
+/**
+ * Class MiddlewareHandler
+ * @package Pandora3\Core\Middleware
+ */
 class MiddlewareHandler implements RequestHandlerInterface {
 
 	/** @var MiddlewareInterface $middleware */
