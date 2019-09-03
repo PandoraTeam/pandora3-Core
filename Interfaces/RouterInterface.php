@@ -12,7 +12,7 @@ interface RouterInterface extends RequestDispatcherInterface {
 
 	/**
 	 * @param string $routePath
-	 * @param RequestHandlerInterface|RequestDispatcherInterface|Closure $handler
+	 * @param Closure|RequestHandlerInterface|RequestDispatcherInterface|string $handler
 	 */
 	function add(string $routePath, $handler): void;
 
