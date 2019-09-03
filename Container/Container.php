@@ -97,11 +97,7 @@ class Container {
 	 * @return mixed
 	 * @throws ContainerException
 	 */
-	protected function build($class, array $params = []) {
-		if ($class instanceof Closure) {
-		 	return $class($this, $params);
-		}
-
+	protected function build(string $class, array $params = []) {
 		if (!class_exists($class)) {
 			throw new ClassNotFoundException($class);
 		}
@@ -135,7 +131,9 @@ class Container {
 
 		[$class, $shared] = $this->dependencies[$abstract] ?? [$abstract, false];
 
-		if ($abstract === $class || $class instanceof Closure) {
+		if ($class instanceof Closure) {
+		 	$object = $class($this, ...$params);
+		} else if ($abstract === $class) {
 			$object = $this->build($class, $params);
 		} else {
 			$object = $this->resolve($class, $params);
@@ -154,7 +152,7 @@ class Container {
 	 * @return mixed
 	 * @throws ContainerException
 	 */
-	public function get(string $abstract, array $params = []) {
+	public function get(string $abstract, ...$params) {
 		return $this->resolve($abstract, $params);
 	}
 
