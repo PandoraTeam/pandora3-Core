@@ -38,7 +38,7 @@ class MiddlewareRouter extends Router {
 	 * @return MiddlewareChain
 	 */
 	protected function chainMiddlewares(...$middlewares) {
-		foreach ($middlewares as $middleware) {
+		foreach ($middlewares as &$middleware) {
 			if (is_string($middleware)) {
 				$middleware = $this->container->get("middleware.$middleware");
 				if (is_null($middleware)) {
