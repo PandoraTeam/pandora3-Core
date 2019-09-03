@@ -15,6 +15,7 @@ class Debug {
 	 */
 	public static function getErrorName($code): string {
 		$errorNames = [
+			0 => 'Error',
 			E_ERROR => 'Error',
 			E_WARNING => 'Warning',
 			E_PARSE => 'Parse error',
@@ -55,7 +56,7 @@ class Debug {
 				'line' => $ex->getLine(),
 			]; */
 
-			echo '<pre style="display: inline;">    </pre><b>'.($errorNames[$ex->getCode()] ?? 'Error').'</b>: ';
+			echo '<pre style="display: inline;">    </pre><b>'.self::getErrorName($ex->getCode()).'</b>: ';
 			echo '<pre style="display: inline;">'.str_replace('  ', '    ', htmlspecialchars($ex->getMessage())).'</pre>';
 			echo ' in <b>'.$ex->getFile().'</b> on line <b>'.$ex->getLine().'</b><br>';
 
