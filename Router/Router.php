@@ -2,6 +2,9 @@
 namespace Pandora3\Core\Router;
 
 use Closure;
+use Pandora3\Core\Container\Container;
+use Pandora3\Core\Controller\Controller;
+use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
 use Pandora3\Core\Interfaces\RequestHandlerInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
@@ -16,29 +19,61 @@ class Router implements RouterInterface {
 	/** @var array $routes */
 	protected $routes;
 	
-	/**
-	 * @param array $routes
-	 */
-	public function __construct(array $routes = []) {
-		$this->routes = $routes;
-	}
+	/** @var Container $container */
+	protected $container;
 	
 	/**
-	 * {@inheritdoc}
+	 * @param array $routes
+	 * @param Container $container
+	 */
+	public function __construct(array $routes = [], Container $container = null) {
+		$this->routes = $routes;
+		$this->container = $container ?? new Container;
+	}
+	
+	// todo: get post methods
+	/**
+	 * @param string $routePath
+	 * @param Closure|RequestDispatcherInterface|RequestHandlerInterface|string $handler
 	 */
 	public function add(string $routePath, $handler): void {
 		if (array_key_exists($routePath, $this->routes)) {
-			// warning: route already exist todo:
+			Debug::logException(new \Exception("Route handler for '$routePath' is already set", E_WARNING));
 			return;
 		}
-		if ($handler instanceof Closure) {
-			$handler = new RequestHandler($handler);
-		} else if (!($handler instanceof RequestHandlerInterface) && !($handler instanceof RequestDispatcherInterface)) {
-			// warning: 2-nd argument 'handler' must be one of: Closure, RequestHandlerInterface, RequestDispatcherInterface todo:
-			return;
-		}
+		
+		$handler = $this->prepareHandler($handler, $routePath);
+		
 		// $this->routes[$routePath] = $route;
 		$this->routes = array_replace([$routePath => $handler], $this->routes);
+	}
+	
+	/**
+	 * @param Closure|RequestHandlerInterface|RequestDispatcherInterface|string $handler
+	 * @param string $routePath
+	 * @return RequestHandlerInterface|RequestDispatcherInterface
+	 */
+	// todo: remove $routePath to compose exception message outside
+	protected function prepareHandler($handler, $routePath) {
+		if ($handler instanceof Closure) {
+			$handler = new RequestHandler($handler);
+		} else {
+			if (is_string($handler)) {
+				$handler = $this->container->get($handler);
+			}
+			if (!(
+				$handler instanceof RequestHandlerInterface ||
+				$handler instanceof RequestDispatcherInterface
+			)) {
+				// todo: exception class
+				throw new \LogicException("Route handler for '$routePath' must be [Closure] or implement [RequestHandlerInterface] or [RequestDispatcherInterface]");
+			}
+			if ($handler instanceof Controller) {
+				$handler->setApplication($this->container->get('app'));
+			}
+		}
+		
+		return $handler;
 	}
 
 	/**
@@ -78,7 +113,7 @@ class Router implements RouterInterface {
 			if ($this->matchRoute($path, $routePath, $subPath, $variables)) {
 				$arguments = array_replace($arguments, $variables);
 				if ($handler instanceof RequestDispatcherInterface) {
-					return $handler->dispatch($subPath, $arguments);
+					$handler = $handler->dispatch($subPath, $arguments);
 				}
 				return $handler;
 			}
