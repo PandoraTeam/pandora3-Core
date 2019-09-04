@@ -13,6 +13,7 @@ use Pandora3\Core\Interfaces\ApplicationInterface;
  * Class BaseApplication
  * @package Pandora3\Core\Application
  *
+ * @property-read Container $container
  * @property-read Registry $config
  * @property-read string $path
  * @property-read string $mode
@@ -23,12 +24,15 @@ abstract class BaseApplication implements ApplicationInterface {
 	const MODE_PROD = 'prod';
 	const MODE_TEST = 'test';
 
-	/** @var Container $container */
-	protected $container;
-
 	/** @var array $properties */
 	protected $properties = [];
-	
+
+	/**
+	 * @internal
+	 * @var Container $container
+	 */
+	protected $container;
+
 	/**
 	 * @internal
 	 * @var string $path
@@ -64,6 +68,7 @@ abstract class BaseApplication implements ApplicationInterface {
 	 */
 	protected function dependencies(Container $container): void {
 		$this->setProperties([
+			'container' => function() { return $this->container; },
 			'config' =>  function() { return $this->config; },
 			'path' =>  function() { return $this->path; },
 			'mode' => function() { return $this->mode; },

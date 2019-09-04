@@ -34,9 +34,6 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	/** @var Container $container */
 	protected $container;
 
-	/** @var Container $appContainer */
-	protected $appContainer;
-	
 	/** @var Application $app */
 	protected $app;
 	
@@ -61,13 +58,6 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	/** @var RequestDispatcherInterface $dispatcher */
 	protected $dispatcher;
 
-	/**
-	 * @param Container|null $appContainer
-	 */
-	public function __construct(Container $appContainer = null) {
-		$this->appContainer = $appContainer ?? new Container;
-	}
-
 	protected function init(): void {
 		if ($this->initialised) {
 			return;
@@ -88,7 +78,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		]);
 
 		$container->set(MiddlewareRouter::class, function(Container $c, $routes = []) {
-			return new MiddlewareRouter($routes, $this->appContainer);
+			return new MiddlewareRouter($routes, $this->app->container);
 		});
 		$container->setShared(TwigRenderer::class, function() {
 			$renderer = new TwigRenderer(APP_PATH.'/Views');
