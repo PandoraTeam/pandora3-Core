@@ -96,27 +96,6 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 	
 	/**
-	 * @return RequestDispatcherInterface
-	 */
-	protected function getDispatcher(): RequestDispatcherInterface {
-		if (is_null($this->dispatcher)) {
-			/** @var RouterInterface|MiddlewareRouter $dispatcher */
-			$dispatcher = $this->container->get(RouterInterface::class);
-			$routes = $this->getRoutes();
-			$this->registerRoutes($dispatcher, $routes);
-			
-			if ($dispatcher instanceof MiddlewareRouter) {
-				$middlewares = $this->getMiddlewares();
-				if ($middlewares) {
-					$dispatcher = $dispatcher->wrapHandler($dispatcher, $middlewares);
-				}
-			}
-			$this->dispatcher = $dispatcher;
-		}
-		return $this->dispatcher;
-	}
-	
-	/**
 	 * @param RouterInterface|MiddlewareRouter $router
 	 * @param array $routes
 	 */
@@ -141,6 +120,27 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		}
 	}
 
+	/**
+	 * @return RequestDispatcherInterface
+	 */
+	protected function getDispatcher(): RequestDispatcherInterface {
+		if (is_null($this->dispatcher)) {
+			/** @var RouterInterface|MiddlewareRouter $dispatcher */
+			$dispatcher = $this->container->get(RouterInterface::class);
+			$routes = $this->getRoutes();
+			$this->registerRoutes($dispatcher, $routes);
+			
+			if ($dispatcher instanceof MiddlewareRouter) {
+				$middlewares = $this->getMiddlewares();
+				if ($middlewares) {
+					$dispatcher = $dispatcher->wrapHandler($dispatcher, $middlewares);
+				}
+			}
+			$this->dispatcher = $dispatcher;
+		}
+		return $this->dispatcher;
+	}
+	
 	/**
 	 * {@inheritdoc}
 	 */
@@ -326,7 +326,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		if ($queryParams) {
 			$uri .= '?'.http_build_query($queryParams);
 		}
-		return new Response('', [
+		return new Response('', 303, [
 			'location' => $this->baseUri.$uri
 		]);
 	}
