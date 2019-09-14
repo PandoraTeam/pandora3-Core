@@ -12,6 +12,7 @@ use Pandora3\Core\Interfaces\RequestInterface;
  * @property-read string $uri
  * @property-read string $refererUri
  * @property-read bool $isPost
+ * @property-read string $protocol
  */
 class Request implements RequestInterface {
 
@@ -32,6 +33,12 @@ class Request implements RequestInterface {
 	 * @var string $method
 	 */
 	protected $method;
+	
+	/**
+	 * @internal
+	 * @var string $protocol
+	 */
+	protected $protocol;
 
 	/** @var array $files */
 	protected $files;
@@ -42,6 +49,7 @@ class Request implements RequestInterface {
 	public function __construct(string $uri) {
 		$this->uri = $uri;
 		$this->method = strtolower($_SERVER['REQUEST_METHOD']);
+		$this->protocol = $_SERVER['SERVER_PROTOCOL'];
 
 		$refererUri = $_SERVER['HTTP_REFERER'] ?? '';
 		if ($refererUri) {
@@ -62,6 +70,7 @@ class Request implements RequestInterface {
 			'uri' => 'getUri',
 			'refererUri' => 'getRefererUri',
 			'isPost' => 'isPost',
+			'protocol' => 'getProtocol',
 		];
 		$methodName = $methods[$property] ?? '';
 		if ($methodName && method_exists($this, $methodName)) {
@@ -98,6 +107,13 @@ class Request implements RequestInterface {
 	 */
 	public function isPost(): bool {
 		return $this->method === 'post';
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getProtocol(): string {
+		return $this->protocol;
 	}
 
 	/**
