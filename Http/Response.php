@@ -19,7 +19,7 @@ class Response implements ResponseInterface {
 	/** @var int $status */
 	protected $status;
 	
-	/** @var array $cookies */
+	/** @var Cookie[] $cookies */
 	protected $cookies = [];
 
 	/**
@@ -108,6 +108,21 @@ class Response implements ResponseInterface {
 	}
 
 	/**
+	 * @return array
+	 */
+	protected function getCookies(): array {
+		$cookies = [];
+		foreach ($this->cookies as $domainCookies) {
+			foreach ($domainCookies as $pathCookies) {
+				foreach ($pathCookies as $cookie) {
+					$cookies[] = $cookie;
+				}
+			}
+		}
+		return $cookies;
+	}
+
+	/**
 	 * @var array $statusText
 	 */
 	protected static $statusText = [
@@ -184,7 +199,7 @@ class Response implements ResponseInterface {
 			header("{$header}: {$value}", false, $this->status);
 		}
 		
-		foreach ($this->cookies as $cookie) {
+		foreach ($this->getCookies() as $cookie) {
 			header('Set-Cookie: '.$cookie, false, $this->status);
 		}
 
