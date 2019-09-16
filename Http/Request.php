@@ -27,13 +27,13 @@ class Request implements RequestInterface {
 	 * @var string $refererUri
 	 */
 	protected $refererUri;
-	
+
 	/**
 	 * @internal
 	 * @var string $method
 	 */
 	protected $method;
-	
+
 	/**
 	 * @internal
 	 * @var string $protocol
@@ -42,7 +42,7 @@ class Request implements RequestInterface {
 
 	/** @var array $files */
 	protected $files;
-	
+
 	/**
 	 * @param string $uri
 	 */
@@ -94,21 +94,21 @@ class Request implements RequestInterface {
 	public function getRefererUri(): string {
 		return $this->refererUri;
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
 	public function getMethod(): string {
 		return $this->method;
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
 	public function isPost(): bool {
 		return $this->method === 'post';
 	}
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
