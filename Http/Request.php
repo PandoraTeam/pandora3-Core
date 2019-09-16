@@ -54,7 +54,7 @@ class Request implements RequestInterface {
 		$refererUri = $_SERVER['HTTP_REFERER'] ?? '';
 		if ($refererUri) {
 			$refererUri = parse_url($refererUri, PHP_URL_PATH);
-			$refererUri = (strncmp($refererUri, '/', 1) === 0 ? '' : '/').$refererUri;
+			$refererUri = (($refererUri[0] ?? '') !== '/' ? '/' : '').$refererUri;
 		}
 		$this->refererUri = $refererUri;
 	}
