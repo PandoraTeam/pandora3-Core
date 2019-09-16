@@ -2,6 +2,7 @@
 namespace Pandora3\Core\Http;
 
 use Pandora3\Core\Interfaces\ResponseInterface;
+use Pandora3\Libs\Cookie\Cookie;
 
 /**
  * Class Response
@@ -17,6 +18,9 @@ class Response implements ResponseInterface {
 	
 	/** @var int $status */
 	protected $status;
+	
+	/** @var array $cookies */
+	protected $cookies = [];
 
 	/**
 	 * @param string $content
@@ -28,27 +32,84 @@ class Response implements ResponseInterface {
 		$this->status = $status;
 		$this->headers = $headers;
 	}
-	
+
+	/**
+	 * @param int $status
+	 */
 	public function setStatus(int $status): void {
 		$this->status = $status;
 	}
 
+	/**
+	 * @param string $header
+	 * @param string $value
+	 */
 	public function setHeader(string $header, string $value): void {
 		$this->headers[$header] = $value;
 	}
-	
+
+	/**
+	 * @param string $header
+	 */
 	public function removeHeader(string $header): void {
 		unset($this->headers[$header]);
 	}
-	
+
+	/**
+	 * @param string $content
+	 */
 	public function setContent(string $content): void {
 		$this->content = $content;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getContent(): string {
 		return $this->content;
 	}
-	
+
+	/**
+	 * @param Cookie $cookie
+	 */
+	public function setCookie(Cookie $cookie): void {
+		$this->cookies[$cookie->domain][$cookie->path][$cookie->name] = $cookie;
+	}
+
+	/**
+	 * @param string $name
+	 * @param string $path
+	 * @param null|string $domain
+	 */
+	public function removeCookie(string $name, string $path = '/', ?string $domain = null): void {
+		unset($this->cookies[$domain][$path][$name]);
+	}
+
+	/**
+	 * @param string $name
+	 * @param string $path
+	 * @param null|string $domain
+	 * @param bool $isSecure
+	 * @param bool $isHttpOnly
+	 */
+	public function clearCookie(
+		string $name, string $path = '/', ?string $domain = null,
+		bool $isSecure = false, bool $isHttpOnly = true
+	): void {
+		$this->setCookie(new Cookie(
+			$name, null, [
+				'expire' => 1,
+				'path' => $path,
+				'domain' => $domain,
+				'isSecure' => $isSecure,
+				'isHttpOnly' => $isHttpOnly,
+			]
+		));
+	}
+
+	/**
+	 * @var array $statusText
+	 */
 	protected static $statusText = [
 		100 => 'Continue',
 		101 => 'Switching Protocols',
@@ -119,17 +180,17 @@ class Response implements ResponseInterface {
 			return;
 		}
 		
+		foreach ($this->headers as $header => $value) {
+			header("{$header}: {$value}", false, $this->status);
+		}
+		
+		foreach ($this->cookies as $cookie) {
+			header('Set-Cookie: '.$cookie, false, $this->status);
+		}
+
 		$statusText = self::$statusText[$this->status] ?? 'unknown status';
 		$version = ($_SERVER['SERVER_PROTOCOL'] ?? '' !== 'HTTP/1.0') ? '1.1' : '1.0';
 		header("HTTP/{$version} {$this->status} {$statusText}", true, $this->status);
-
-		foreach ($this->headers as $header => $value) {
-			header("{$header}: {$value}", false);
-		}
-		
-		/* foreach ($this->cookies) {
-			;
-		} */
 	}
 	
 	public function send(): void {
