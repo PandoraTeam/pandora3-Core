@@ -140,22 +140,29 @@ class Request implements RequestInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function get(string $param) {
-		return $_GET[$param] ?? null;
+	public function get(string $name) {
+		return $_GET[$name] ?? null;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function post(string $param) {
-		return $_POST[$param] ?? null;
+	public function post(string $name) {
+		return $_POST[$name] ?? null;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function file(string $param) {
-		return $_FILES[$param] ?? null;
+	public function file(string $name) {
+		return $_FILES[$name] ?? null;
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getCookie(string $name) {
+		return $_COOKIE[$name] ?? null;
 	}
 
 	/**

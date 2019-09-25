@@ -62,6 +62,12 @@ interface RequestInterface {
 	function file(string $param);
 	
 	/**
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function getCookie(string $name);
+	
+	/**
 	 * @return array
 	 */
 	function getFiles(): array;

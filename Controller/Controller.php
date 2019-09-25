@@ -3,12 +3,12 @@ namespace Pandora3\Core\Controller;
 
 // temporary
 use App\Widgets\Menu\Menu;
+use Pandora3\Plugins\TwigRussianPluralExtension\TwigRussianPluralExtension;
 
 use Closure;
 use Pandora3\Core\Controller\Exceptions\ControllerRenderViewException;
 use Pandora3\Core\Debug\Debug;
 use Pandora3\Core\Interfaces\RendererInterface;
-use Pandora3\Core\Middleware\Interfaces\MiddlewareInterface;
 use Pandora3\Core\MiddlewareRouter\MiddlewareRouter;
 use Pandora3\Libs\Application\Application; // todo: fix dependency
 use Pandora3\Core\Interfaces\RequestDispatcherInterface;
@@ -20,7 +20,7 @@ use Pandora3\Core\Interfaces\ResponseInterface;
 use Pandora3\Core\Interfaces\RouterInterface;
 use Pandora3\Core\Router\RequestHandler;
 use Pandora3\Core\Http\Response;
-use Pandora3\Plugins\Twig\TwigRenderer; // todo: extend dependency from application container
+use Pandora3\Plugins\Twig\TwigRenderer;
 
 /**
  * Class Controller
@@ -82,9 +82,11 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		});
 		$container->setShared(TwigRenderer::class, function() {
 			$renderer = new TwigRenderer(APP_PATH.'/Views');
+			$renderer->addExtensions([new TwigRussianPluralExtension()]);
 			// todo: extract to extension
 			$renderer->addFunctions([
 				'dump' => 'dump',
+				/* 'plural' => , */
 				'debugOutput' => function() {
 					$output = \Dump::getOutput();
 					return $output ? '<div class="debug-output">'.$output.'</div>' : '';
@@ -149,7 +151,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 	}
 	
 	/**
-	 * @return MiddlewareInterface[]
+	 * @return array[]
 	 */
 	public function getMiddlewares(): array {
 		return [];

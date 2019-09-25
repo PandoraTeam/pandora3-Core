@@ -84,7 +84,7 @@ class Container {
 				continue;
 			}
 			$class = $dependency->getClass();
-			$result[] = (!is_null($class))
+			$result[] = !is_null($class)
 				? $this->resolve($class->name)
 				: $this->resolvePrimitive($dependency, $className);
 		}

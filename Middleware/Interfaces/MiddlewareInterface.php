@@ -9,10 +9,10 @@ interface MiddlewareInterface {
 	
 	/**
 	 * @param RequestInterface $request
-	 * @param array $arguments
 	 * @param RequestHandlerInterface $handler
+	 * @param array $arguments
 	 * @return ResponseInterface
 	 */
-	function process(RequestInterface $request, array $arguments, RequestHandlerInterface $handler): ResponseInterface;
+	function process(RequestInterface $request, RequestHandlerInterface $handler, ...$arguments): ResponseInterface;
 
 }

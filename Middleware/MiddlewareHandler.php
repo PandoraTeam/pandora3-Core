@@ -27,7 +27,7 @@ class MiddlewareHandler implements RequestHandlerInterface {
 	 * {@inheritdoc}
 	 */
 	public function handle(RequestInterface $request, array $arguments = []): ResponseInterface {
-		return $this->middleware->process($request, $arguments, $this->handler);
+		return $this->middleware->process($request, $this->handler, ...$arguments);
 	}
 	
 }
