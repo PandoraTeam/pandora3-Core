@@ -3,7 +3,7 @@ namespace Pandora3\Core\Controller;
 
 // temporary
 use App\Widgets\Menu\Menu;
-use Pandora3\Plugins\TwigRussianPluralExtension\TwigRussianPluralExtension;
+use Pandora3\Plugins\TwigRussianPluralExtension\RussianPluralExtension;
 
 use Closure;
 use Pandora3\Core\Controller\Exceptions\ControllerRenderViewException;
@@ -82,7 +82,7 @@ abstract class Controller implements ControllerInterface, RequestDispatcherInter
 		});
 		$container->setShared(TwigRenderer::class, function() {
 			$renderer = new TwigRenderer(APP_PATH.'/Views');
-			$renderer->addExtensions([new TwigRussianPluralExtension()]);
+			$renderer->addExtensions([new RussianPluralExtension]);
 			// todo: extract to extension
 			$renderer->addFunctions([
 				'dump' => 'dump',
